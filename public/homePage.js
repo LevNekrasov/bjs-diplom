@@ -1,15 +1,13 @@
 let logoutButton = new LogoutButton();
-logoutButton.action = function logoutUser(){
-    ApiConnector.logout(location.reload());
+logoutButton.action = function(){
+    ApiConnector.logout(() => location.reload());
 }
 
-ApiConnector.current(response => api(response))
-
-function api(el){
-    if(el.success){
-        ProfileWidget.showProfile(el.data);
+ApiConnector.current(object => {
+    if(object.success){
+        ProfileWidget.showProfile(object.data);
     }
-}
+})
 
 let ratesBoard = new RatesBoard();
 ApiConnector.getStocks(data => currencyTable(data));
@@ -24,7 +22,7 @@ function currencyTable(object){
 
 let moneyManager = new MoneyManager();
 moneyManager.addMoneyCallback = function(data){
-    ApiConnector.addMoney(data, function (object){
+    ApiConnector.addMoney(data, object => {
         if(object.success){
             ProfileWidget.showProfile(object.data);
             moneyManager.setMessage(object.success,'Зачислено: ' + data.amount + ' ' + data.currency);
@@ -32,11 +30,11 @@ moneyManager.addMoneyCallback = function(data){
         else{
             moneyManager.setMessage(object.success, object.error);
         }
-})
+    })
 }
 
 moneyManager.conversionMoneyCallback = function(data){
-    ApiConnector.convertMoney(data, function(object){
+    ApiConnector.convertMoney(data, object => {
         if(object.success){
             ProfileWidget.showProfile(object.data);
             moneyManager.setMessage(object.success,'Конвертировано: ' + data.fromAmount + ' ' + data.fromCurrency + ' в ' + data.targetCurrency);
@@ -48,7 +46,7 @@ moneyManager.conversionMoneyCallback = function(data){
 }
 
 moneyManager.sendMoneyCallback = function(data){
-    ApiConnector.transferMoney(data, function(object){
+    ApiConnector.transferMoney(data, object => {
         if(object.success){
             ProfileWidget.showProfile(object.data);
             moneyManager.setMessage(object.success,'Переведено: ' + data.amount + ' ' + data.currency);
@@ -60,18 +58,16 @@ moneyManager.sendMoneyCallback = function(data){
 }
 
 let favoritesWidget = new FavoritesWidget();
-ApiConnector.getFavorites(data => favourites(data))
-
-function favourites(object){
+ApiConnector.getFavorites(object => {
     if(object.success){
         favoritesWidget.clearTable();
         favoritesWidget.fillTable(object.data);
         moneyManager.updateUsersList(object.data)
     }
-}
+})
 
 favoritesWidget.addUserCallback = function(data){
-    ApiConnector.addUserToFavorites(data, function(object){
+    ApiConnector.addUserToFavorites(data, object => {
         if(object.success){
             favoritesWidget.clearTable();
             favoritesWidget.fillTable(object.data);
@@ -85,7 +81,7 @@ favoritesWidget.addUserCallback = function(data){
 }
 
 favoritesWidget.removeUserCallback = function(data){
-    ApiConnector.removeUserFromFavorites(data, function(object){
+    ApiConnector.removeUserFromFavorites(data, object => {
         if(object.success){
             favoritesWidget.clearTable();
             favoritesWidget.fillTable(object.data);
